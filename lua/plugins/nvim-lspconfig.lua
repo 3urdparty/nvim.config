@@ -15,19 +15,34 @@ return {
           vim.trim(vim.fn.system("xcrun -f sourcekit-lsp")),
         },
 
+        filetypes = { "swift" },
+
         root_dir = function(bufnr, callback)
           local filename = vim.api.nvim_buf_get_name(bufnr)
 
           local root = vim.fs.root(filename, {
             "Package.swift",
-            ".git",
           })
 
-          callback(root)
+          if root then
+            callback(root)
+          end
         end,
       })
 
+      vim.lsp.config("clangd", {
+        cmd = {
+          "clangd",
+          "--background-index",
+          "--clang-tidy",
+          "--header-insertion=iwyu",
+          "--completion-style=detailed",
+          "--function-arg-placeholders=true",
+        },
+      })
+
       vim.lsp.enable("sourcekit")
+      vim.lsp.enable("clangd")
 
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(event)
